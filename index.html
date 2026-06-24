@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL vs WI Test Series 2026 — Fantasy Auction Strategy</title>
+  <style>
+    :root {
+      --sl-blue: #1a237e;
+      --sl-gold: #fbc02d;
+      --wi-maroon: #7b1fa2;
+      --wi-gold: #ff8f00;
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --card-alt: #16213e;
+      --text: #e0e0e0;
+      --text-muted: #9e9e9e;
+      --accent: #00e5ff;
+      --green: #00e676;
+      --orange: #ff9100;
+      --red: #ff5252;
+      --border: #2a2a4a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1a237e 0%, #4a148c 50%, #7b1fa2 100%);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .hero h1 .flag { font-size: 2rem; }
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.7);
+      position: relative;
+    }
+    .hero .badge-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+      position: relative;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* Pitch & Venue Card */
+    .venue-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .venue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .venue-stat {
+      background: var(--card-alt);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .venue-stat .val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .venue-stat .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.25rem;
+    }
+
+    /* Warmup Card */
+    .warmup-card {
+      background: linear-gradient(135deg, var(--card) 0%, #1e1e3a 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .warmup-result {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .warmup-team {
+      text-align: center;
+    }
+    .warmup-team .name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    .warmup-team .scores {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .warmup-vs {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .warmup-verdict {
+      text-align: center;
+      background: rgba(255,82,82,0.1);
+      border: 1px solid rgba(255,82,82,0.3);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      margin-top: 0.5rem;
+      color: var(--red);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .warmup-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .warmup-hl {
+      background: var(--card-alt);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+    .warmup-hl strong { color: var(--accent); }
+
+    /* Tier Cards */
+    .tier {
+      margin-bottom: 2rem;
+    }
+    .tier-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .tier-badge {
+      padding: 0.3rem 0.9rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tier-badge.t1 { background: linear-gradient(135deg, #ffd700, #ff8f00); color: #000; }
+    .tier-badge.t2 { background: linear-gradient(135deg, #90caf9, #42a5f5); color: #000; }
+    .tier-badge.t3 { background: linear-gradient(135deg, #a5d6a7, #66bb6a); color: #000; }
+    .tier-badge.t4 { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+
+    .tier-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .player-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .player-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .player-card .team-flag {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.2rem;
+    }
+    .player-card .name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+    .player-card .role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.6rem;
+    }
+    .player-card .stat-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .mini-stat {
+      background: var(--card-alt);
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.78rem;
+    }
+    .mini-stat .num { font-weight: 700; color: var(--accent); }
+    .player-card .why {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    /* Strategy Section */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .strategy-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+    .strategy-card .number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-bottom: 0.6rem;
+    }
+    .strategy-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .strategy-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* Squads */
+    .squads-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .squad-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .squad-header {
+      padding: 1rem 1.25rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .squad-header.sl { background: linear-gradient(135deg, #1a237e, #283593); }
+    .squad-header.wi { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+    .squad-list {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .squad-player {
+      background: var(--card-alt);
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.82rem;
+    }
+    .squad-player.captain { border: 1px solid var(--sl-gold); color: var(--sl-gold); }
+    .squad-player.vc { border: 1px solid var(--accent); }
+
+    /* Captain Picks */
+    .captain-section {
+      background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .captain-picks {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .captain-pick {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      padding: 1.25rem 2rem;
+      text-align: center;
+    }
+    .captain-pick .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .captain-pick .player-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .captain-pick .reason {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 0.25rem;
+    }
+
+    /* Budget Allocation */
+    .budget-bar-container {
+      margin: 1.5rem 0;
+    }
+    .budget-bar {
+      display: flex;
+      height: 36px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+    .budget-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #000;
+      transition: flex 0.3s;
+    }
+    .budget-legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.82rem;
+    }
+    .budget-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.6rem; }
+      .player-grid { grid-template-columns: 1fr; }
+      .strategy-grid { grid-template-columns: 1fr; }
+      .squads-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1><span class="flag">&#127473;&#127472;</span> Sri Lanka vs West Indies <span class="flag">&#127464;&#127462;</span></h1>
+    <div class="subtitle">Test Series 2026 &mdash; Fantasy Auction Strategy Playbook</div>
+    <div class="badge-row">
+      <span class="badge">Sir Vivian Richards Stadium, Antigua</span>
+      <span class="badge">1st Test: Jun 25&ndash;29</span>
+      <span class="badge">2nd Test: Jul 3&ndash;7</span>
+      <span class="badge">ICC WTC 2025&ndash;27</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Pitch & Venue -->
+    <div class="section-title">
+      <div class="icon" style="background: #1e3a5f;">&#127967;</div>
+      Pitch &amp; Venue Intel
+    </div>
+    <div class="venue-card">
+      <div class="venue-grid">
+        <div class="venue-stat">
+          <div class="val">13</div>
+          <div class="label">Tests Played</div>
+        </div>
+        <div class="venue-stat">
+          <div class="val">3</div>
+          <div class="label">Bat-First Wins</div>
+        </div>
+        <div class="venue-stat">
+          <div class="val">4</div>
+          <div class="label">Chase Wins</div>
+        </div>
+        <div class="venue-stat">
+          <div class="val">6</div>
+          <div class="label">Draws / NR</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem; font-size:0.9rem; color: var(--text-muted);">
+        <strong style="color: var(--accent);">Key Insight:</strong>
+        Pace &amp; bounce early, slows down later. Fast bowlers dominate Days 1&ndash;2, spinners become crucial Days 3&ndash;5.
+        Batting second has a historical edge &mdash; pick bowlers who'll take new-ball wickets.
+      </div>
+    </div>
+
+    <!-- Warmup Takeaways -->
+    <div class="section-title">
+      <div class="icon" style="background: #3e2723;">&#129354;</div>
+      Warmup Match Signals
+    </div>
+    <div class="warmup-card">
+      <div class="warmup-result">
+        <div class="warmup-team">
+          <div class="name">WI Select XI</div>
+          <div class="scores">205 &amp; 199</div>
+        </div>
+        <div class="warmup-vs">beat</div>
+        <div class="warmup-team">
+          <div class="name">Sri Lanka</div>
+          <div class="scores">281 &amp; 108</div>
+        </div>
+      </div>
+      <div class="warmup-verdict">
+        SL collapsed chasing 124 &mdash; vulnerable against quality pace
+      </div>
+      <div class="warmup-highlights">
+        <div class="warmup-hl"><strong>Lahiru Kumara</strong> 4/39 &mdash; looked sharp, SL's best pacer</div>
+        <div class="warmup-hl"><strong>Alzarri Joseph</strong> &amp; Nial Smith shared 9 wickets in SL 2nd innings</div>
+        <div class="warmup-hl"><strong>SL batting fragile</strong> vs pace &mdash; WI seamers are premium picks</div>
+      </div>
+    </div>
+
+    <!-- Squads -->
+    <div class="section-title">
+      <div class="icon" style="background: #1b5e20;">&#128101;</div>
+      Full Squads
+    </div>
+    <div class="squads-row">
+      <div class="squad-card">
+        <div class="squad-header sl">&#127473;&#127472; Sri Lanka (17 players)</div>
+        <div class="squad-list">
+          <span class="squad-player captain">Dhananjaya de Silva (C)</span>
+          <span class="squad-player vc">Kamindu Mendis (VC)</span>
+          <span class="squad-player">Pathum Nissanka</span>
+          <span class="squad-player">Dinesh Chandimal</span>
+          <span class="squad-player">Nishan Madushka</span>
+          <span class="squad-player">Lahiru Udara</span>
+          <span class="squad-player">Kusal Mendis</span>
+          <span class="squad-player">Pasindu Sooriyabandara</span>
+          <span class="squad-player">Sonal Dinusha</span>
+          <span class="squad-player">Isitha Wijesundara</span>
+          <span class="squad-player">Milan Rathnayake</span>
+          <span class="squad-player">Prabath Jayasuriya</span>
+          <span class="squad-player">Ramesh Mendis</span>
+          <span class="squad-player">Asitha Fernando</span>
+          <span class="squad-player">Vishwa Fernando</span>
+          <span class="squad-player">Lahiru Kumara</span>
+          <span class="squad-player">Kasun Rajitha</span>
+        </div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-header wi">&#127464;&#127462; West Indies (15 players)</div>
+        <div class="squad-list">
+          <span class="squad-player captain">Roston Chase (C)</span>
+          <span class="squad-player vc">Jomel Warrican (VC)</span>
+          <span class="squad-player">John Campbell</span>
+          <span class="squad-player">Tagenarine Chanderpaul</span>
+          <span class="squad-player">Joshua Da Silva</span>
+          <span class="squad-player">Justin Greaves</span>
+          <span class="squad-player">Kavem Hodge</span>
+          <span class="squad-player">Shai Hope</span>
+          <span class="squad-player">Amir Jangoo</span>
+          <span class="squad-player">Alzarri Joseph</span>
+          <span class="squad-player">Shamar Joseph</span>
+          <span class="squad-player">Brandon King</span>
+          <span class="squad-player">Anderson Phillip</span>
+          <span class="squad-player">Kemar Roach</span>
+          <span class="squad-player">Jayden Seales</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Captain / VC Picks -->
+    <div class="section-title">
+      <div class="icon" style="background: #b71c1c;">&#9733;</div>
+      Captain &amp; Vice-Captain Picks
+    </div>
+    <div class="captain-section">
+      <div class="captain-picks">
+        <div class="captain-pick">
+          <div class="label">Captain (2x Points)</div>
+          <div class="player-name">Kamindu Mendis</div>
+          <div class="reason">Avg 63 | ICC #6 | Bats + bowls spin</div>
+        </div>
+        <div class="captain-pick">
+          <div class="label">Vice-Captain (1.5x Points)</div>
+          <div class="player-name">Alzarri Joseph</div>
+          <div class="reason">124 Test wkts | Home conditions | SL collapse vs pace</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Allocation -->
+    <div class="section-title">
+      <div class="icon" style="background: #4e342e;">&#128176;</div>
+      Recommended Budget Split
+    </div>
+    <div class="venue-card">
+      <div class="budget-bar-container">
+        <div class="budget-bar">
+          <div class="budget-segment" style="flex: 55; background: linear-gradient(135deg, #ffd700, #ff8f00);">55%</div>
+          <div class="budget-segment" style="flex: 30; background: linear-gradient(135deg, #90caf9, #42a5f5);">30%</div>
+          <div class="budget-segment" style="flex: 15; background: linear-gradient(135deg, #a5d6a7, #66bb6a);">15%</div>
+        </div>
+        <div class="budget-legend">
+          <div class="budget-legend-item"><div class="legend-dot" style="background: #ffd700;"></div> Tier 1 Must-Haves (55%)</div>
+          <div class="budget-legend-item"><div class="legend-dot" style="background: #64b5f6;"></div> Tier 2 Value Picks (30%)</div>
+          <div class="budget-legend-item"><div class="legend-dot" style="background: #81c784;"></div> Tier 3 Budget Fills (15%)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 1 -->
+    <div class="tier">
+      <div class="tier-header">
+        <span class="tier-badge t1">Tier 1</span>
+        <span class="tier-label">Must-Haves &mdash; Spend Big</span>
+      </div>
+      <div class="player-grid">
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Kamindu Mendis</div>
+          <div class="role">Batter / All-Rounder</div>
+          <div class="stat-row">
+            <span class="mini-stat">Avg <span class="num">63</span></span>
+            <span class="mini-stat">ICC <span class="num">#6</span></span>
+            <span class="mini-stat">Runs <span class="num">1,316</span></span>
+          </div>
+          <div class="why">SL's best batter by a mile. Also bowls spin &mdash; dual fantasy points from bat + ball. First player with 50+ in each of his first 8 Tests.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Pathum Nissanka</div>
+          <div class="role">Opening Batter</div>
+          <div class="stat-row">
+            <span class="mini-stat">Last Series <span class="num">187 &amp; 100+</span></span>
+            <span class="mini-stat">MOTM <span class="num">&amp; MOTS</span></span>
+          </div>
+          <div class="why">Scorching form &mdash; 187 &amp; a century vs Bangladesh. Won Player of the Match AND Series. Top-order anchor.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Alzarri Joseph</div>
+          <div class="role">Fast Bowler</div>
+          <div class="stat-row">
+            <span class="mini-stat">Wkts <span class="num">124</span></span>
+            <span class="mini-stat">Best <span class="num">5/27</span></span>
+            <span class="mini-stat">ICC <span class="num">#32</span></span>
+          </div>
+          <div class="why">Took wickets in warmup. Pace + home conditions in Antigua = lethal. SL batting collapsed vs his pace in practice match.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Shamar Joseph</div>
+          <div class="role">Fast Bowler</div>
+          <div class="stat-row">
+            <span class="mini-stat">Best <span class="num">7/68</span></span>
+            <span class="mini-stat"><span class="num">WI POTY</span></span>
+          </div>
+          <div class="why">7/68 at the Gabba vs Australia. Named WI Test Player of the Year. Back fresh from injury &mdash; rested and dangerous.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 2 -->
+    <div class="tier">
+      <div class="tier-header">
+        <span class="tier-badge t2">Tier 2</span>
+        <span class="tier-label">Strong Value Picks</span>
+      </div>
+      <div class="player-grid">
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Jayden Seales</div>
+          <div class="role">Fast Bowler</div>
+          <div class="stat-row">
+            <span class="mini-stat">Recent <span class="num">38 wkts / 8 Tests</span></span>
+          </div>
+          <div class="why">Exceptional recent strike rate. Young, hungry, perfectly suited to Antigua bounce. Can be the 3rd seamer who wins you the league.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Dinesh Chandimal</div>
+          <div class="role">Batter / WK Option</div>
+          <div class="stat-row">
+            <span class="mini-stat">ICC <span class="num">#10</span></span>
+            <span class="mini-stat">Last Inn <span class="num">74 vs AUS</span></span>
+          </div>
+          <div class="why">ICC rank #10 batter. 32 Test fifties. Battle-hardened veteran who performs under pressure in tough conditions.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Roston Chase</div>
+          <div class="role">All-Rounder (Captain)</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">Bat + Off-spin</span></span>
+            <span class="mini-stat"><span class="num">Captain</span></span>
+          </div>
+          <div class="why">Guaranteed to bat at 5 AND bowl spin. Captain = always plays. Dual-point stream makes him elite value in Tests.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Jomel Warrican</div>
+          <div class="role">Left-Arm Spinner (VC)</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">Lead Spinner</span></span>
+          </div>
+          <div class="why">WI's frontline spinner. Antigua pitch deteriorates &mdash; becomes crucial on Days 3-5. Vice-captain = guaranteed XI.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Prabath Jayasuriya</div>
+          <div class="role">Left-Arm Spinner</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">SL #1 Spinner</span></span>
+          </div>
+          <div class="why">SL's premier spinner. If the pitch turns on Day 4-5, he's match-winning. Cheap buy that could dominate 2nd innings.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Dhananjaya de Silva</div>
+          <div class="role">Batter / Off-Spin (Captain)</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">Bat + Bowl + Captain</span></span>
+          </div>
+          <div class="why">Triple-threat: bats at 4/5, bowls off-spin, captain bonus points. Three fantasy point streams in one player.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 3 -->
+    <div class="tier">
+      <div class="tier-header">
+        <span class="tier-badge t3">Tier 3</span>
+        <span class="tier-label">Budget Picks &amp; Differentials</span>
+      </div>
+      <div class="player-grid">
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Joshua Da Silva</div>
+          <div class="role">Wicketkeeper-Batter</div>
+          <div class="stat-row">
+            <span class="mini-stat">Domestic <span class="num">996 runs / 2 seasons</span></span>
+          </div>
+          <div class="why">In form from domestic cricket. Keeper behind a lethal pace attack = catches &amp; stumping bonus points.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Shai Hope</div>
+          <div class="role">Batter</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">Middle Order</span></span>
+          </div>
+          <div class="why">Class player at home. Could be massively undervalued if others overbid on pacers. Quiet differential pick.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Asitha Fernando</div>
+          <div class="role">Fast Bowler</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">SL Lead Seamer</span></span>
+          </div>
+          <div class="why">SL's workhorse seamer. Will bowl lots of overs = more chances for wickets. Budget-friendly pace option.</div>
+        </div>
+        <div class="player-card">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Tagenarine Chanderpaul</div>
+          <div class="role">Opening Batter</div>
+          <div class="stat-row">
+            <span class="mini-stat">Style <span class="num">Gritty Accumulator</span></span>
+          </div>
+          <div class="why">Occupies the crease for long periods. Steady points from an opener who rarely gives his wicket away cheaply.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Horse / Uncapped -->
+    <div class="tier">
+      <div class="tier-header">
+        <span class="tier-badge" style="background: linear-gradient(135deg, #ce93d8, #ab47bc); color: #000;">Dark Horse</span>
+        <span class="tier-label">Uncapped &amp; Fringe Players Who Could Play</span>
+      </div>
+      <div class="player-grid">
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Lahiru Udara</div>
+          <div class="role">Opening Batter &mdash; Uncapped in Tests</div>
+          <div class="stat-row">
+            <span class="mini-stat">FC Last 5 Inn <span class="num">601 runs</span></span>
+            <span class="mini-stat">FC 100s <span class="num">19</span></span>
+            <span class="mini-stat">90-ball <span class="num">century</span></span>
+          </div>
+          <div class="why">In ABSURD first-class form &mdash; 601 runs in 5 innings including a 261 and multiple centuries. 19 FC hundreds. Could open alongside Nissanka. Best uncapped value in the auction.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Sonal Dinusha</div>
+          <div class="role">All-Rounder &mdash; Uncapped in Tests</div>
+          <div class="stat-row">
+            <span class="mini-stat">SL-A Runs <span class="num">995</span></span>
+            <span class="mini-stat">SL-A Wkts <span class="num">14</span></span>
+            <span class="mini-stat">T20I <span class="num">16 caps</span></span>
+          </div>
+          <div class="why">All-rounder with 995 runs and 14 wickets for SL-A. Has T20I experience (16 caps). Scored 52 vs NZ-A in April. If he plays, dual points from bat + bowl at minimum price.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Isitha Wijesundara</div>
+          <div class="role">Bowling All-Rounder &mdash; Uncapped</div>
+          <div class="stat-row">
+            <span class="mini-stat">SL-A Wkts <span class="num">30</span></span>
+            <span class="mini-stat">SL-A Runs <span class="num">189</span></span>
+            <span class="mini-stat">Style <span class="num">Medium Fast</span></span>
+          </div>
+          <div class="why">30 wickets for SL-A &mdash; serious wicket-taking threat. Left-hand bat + right-arm medium fast. If SL play an extra seamer, he could slot in as the pace all-rounder option.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Milan Rathnayake</div>
+          <div class="role">Seam-Bowling All-Rounder</div>
+          <div class="stat-row">
+            <span class="mini-stat">Test Debut <span class="num">74 runs @ #9</span></span>
+            <span class="mini-stat">Style <span class="num">Medium Fast</span></span>
+          </div>
+          <div class="why">Scored 74 on Test debut from #9 at Manchester. Useful with bat AND ball. If SL want a seam-bowling all-rounder balance, he starts. Great value as a lower-order contributor.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127473;&#127472;</div>
+          <div class="name">Pasindu Sooriyabandara</div>
+          <div class="role">Batter &mdash; Uncapped</div>
+          <div class="stat-row">
+            <span class="mini-stat">Domestic <span class="num">Avg 31.67</span></span>
+            <span class="mini-stat">Teams <span class="num">Galle / Moors SC</span></span>
+          </div>
+          <div class="why">Right-hand batter rewarded for domestic form. Plays for Galle and Moors SC. Moderate domestic average &mdash; only pick at base price as a punt if others are taken.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Amir Jangoo</div>
+          <div class="role">Batter / WK Option &mdash; 1 Test Cap</div>
+          <div class="stat-row">
+            <span class="mini-stat">WI Champ <span class="num">411 runs @ 68.50</span></span>
+            <span class="mini-stat">FC <span class="num">Two double-centuries</span></span>
+          </div>
+          <div class="why">Only 1 Test cap but ELITE domestic form &mdash; 411 runs at 68.50 in 2026 WI Championship, 2nd highest run-getter. Two FC double-centuries. If he bats at 3 or 4, he's a steal at low price.</div>
+        </div>
+        <div class="player-card" style="border-color: #ab47bc;">
+          <div class="team-flag">&#127464;&#127462;</div>
+          <div class="name">Anderson Phillip</div>
+          <div class="role">Fast Bowler</div>
+          <div class="stat-row">
+            <span class="mini-stat">Role <span class="num">4th Seamer Option</span></span>
+          </div>
+          <div class="why">WI's 4th seamer option. If they rest one of the big 3, Phillip steps in. Antiguan home conditions suit him. Only worth a punt at minimum price.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avoid -->
+    <div class="tier">
+      <div class="tier-header">
+        <span class="tier-badge t4">Avoid / Low Priority</span>
+        <span class="tier-label">Don't Overpay</span>
+      </div>
+      <div class="player-grid">
+        <div class="player-card" style="opacity: 0.7;">
+          <div class="name">Brandon King</div>
+          <div class="role">WI &mdash; White-Ball Specialist</div>
+          <div class="why">Primarily a T20/ODI player. No proven Test pedigree. Let rivals overpay for the name recognition.</div>
+        </div>
+        <div class="player-card" style="opacity: 0.7;">
+          <div class="name">John Campbell</div>
+          <div class="role">WI &mdash; Opener</div>
+          <div class="why">Historically inconsistent. Likely to get out cheaply against SL's new-ball attack.</div>
+        </div>
+        <div class="player-card" style="opacity: 0.7;">
+          <div class="name">Kavem Hodge</div>
+          <div class="role">WI &mdash; Middle-Order Batter</div>
+          <div class="why">Decent but unspectacular. With Chase, Hope, Greaves, and Jangoo competing for middle-order spots, he may not even start.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategy Tips -->
+    <div class="section-title">
+      <div class="icon" style="background: #e65100;">&#9889;</div>
+      Auction Playbook &mdash; 7 Rules
+    </div>
+    <div class="strategy-grid">
+      <div class="strategy-card">
+        <div class="number">1</div>
+        <h3>Lock In Kamindu + 1 WI Pacer</h3>
+        <p>These are non-negotiable. Kamindu's bat+bowl combo and a WI pacer exploiting SL's fragile batting are your foundation. Spend up to 55% here.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">2</div>
+        <h3>All-Rounders Are King in Tests</h3>
+        <p>Chase and Dhananjaya de Silva bat, bowl, and are captains. Double/triple point streams. Prioritize them over pure batters.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">3</div>
+        <h3>Stack WI Pace (2 of 3)</h3>
+        <p>Alzarri, Shamar, Seales &mdash; try to own 2. SL collapsed vs pace in the warmup. Antigua rewards fast bowling. This is your series edge.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">4</div>
+        <h3>Don't Overpay for Pure Batters</h3>
+        <p>Seam-friendly conditions mean this won't be a run-fest. Batters who also bowl (Kamindu, Chase, DDS) give you insurance if batting collapses happen.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">5</div>
+        <h3>Snag a Spinner Late &amp; Cheap</h3>
+        <p>Prabath or Warrican at a discount. Most rivals will chase pacers. Spinners come into play Days 3-5 and can be match-winners for pennies.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">6</div>
+        <h3>Da Silva Over Kusal at Keeper</h3>
+        <p>Da Silva is in domestic form (996 runs) and catches behind a lethal WI pace trio. If he's cheaper than Kusal Mendis, snap him up.</p>
+      </div>
+      <div class="strategy-card">
+        <div class="number">7</div>
+        <h3>Mine the Dark Horses Late</h3>
+        <p>Lahiru Udara (601 runs in 5 FC innings) and Amir Jangoo (avg 68.50 in WI Champ) are absurd value at base price. If they play, they outperform their cost 10x.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>SL vs WI Test Series 2026 &mdash; Fantasy Auction Strategy</p>
+    <p style="margin-top:0.5rem;">
+      Data sourced from
+      <a href="https://www.espncricinfo.com/series/sri-lanka-in-west-indies-2026-1538292" target="_blank">ESPNcricinfo</a> |
+      <a href="https://www.windiescricket.com" target="_blank">Windies Cricket</a> |
+      <a href="https://www.icc-cricket.com" target="_blank">ICC</a> |
+      <a href="https://www.thepapare.com" target="_blank">ThePapare</a>
+    </p>
+    <p style="margin-top:0.3rem; opacity: 0.5;">Built with research, not guesswork.</p>
+  </div>
+
+</body>
+</html>
+
